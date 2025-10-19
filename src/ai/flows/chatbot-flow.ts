@@ -17,14 +17,14 @@ const MessageSchema = z.object({
 });
 
 const ChatbotInputSchema = z.object({
-  message: z.string().describe('The user\'s message to the chatbot.'),
+  message: z.string().describe("The user's message to the chatbot."),
   role: z.enum(['customer', 'admin']).describe('The role of the user.'),
   history: z.array(MessageSchema).describe('The conversation history.'),
 });
 export type ChatbotInput = z.infer<typeof ChatbotInputSchema>;
 
 const ChatbotOutputSchema = z.object({
-  reply: z.string().describe('The chatbot\'s response.'),
+  reply: z.string().describe("The chatbot's response."),
 });
 export type ChatbotOutput = z.infer<typeof ChatbotOutputSchema>;
 
@@ -52,17 +52,16 @@ const chatbotFlow = ai.defineFlow(
         'You are a friendly and helpful shopping assistant for an online clothing store called Shema Shop. Your goal is to help customers find products, answer questions about items, and provide styling advice. You are energetic and love fashion.';
     }
 
-    const prompt = `${systemPrompt}
-
-    Conversation History:
-    ${history.map((msg) => `${msg.sender}: ${msg.text}`).join('\n')}
-    user: ${message}
-    bot:`;
-
-    const { output } = await ai.generate({
-      prompt: prompt,
+    const llmResponse = await ai.generate({
+      model: 'googleai/gemini-2.5-flash',
+      prompt: `${systemPrompt}
+  
+      Conversation History:
+      ${history.map((msg) => `${msg.sender}: ${msg.text}`).join('\n')}
+      user: ${message}
+      bot:`,
     });
 
-    return { reply: output! as string };
+    return { reply: llmResponse.text };
   }
 );

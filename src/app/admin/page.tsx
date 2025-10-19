@@ -2,7 +2,7 @@
 
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -15,10 +15,19 @@ import {
 import { products } from '@/data/products';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import AddProductForm from '@/components/add-product-form';
 
 export default function AdminPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -33,9 +42,9 @@ export default function AdminPage() {
       </div>
     );
   }
-  
-  const getImage = (id: string) => PlaceHolderImages.find((img) => img.id === id);
 
+  const getImage = (id: string) =>
+    PlaceHolderImages.find((img) => img.id === id);
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-16">
@@ -43,7 +52,17 @@ export default function AdminPage() {
         <h1 className="font-headline text-3xl font-bold md:text-4xl">
           Manage Products
         </h1>
-        <Button>Add New Product</Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>Add New Product</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add New Product</DialogTitle>
+            </DialogHeader>
+            <AddProductForm setOpen={setOpen} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="mt-8 overflow-hidden rounded-lg border shadow-sm">
@@ -59,29 +78,38 @@ export default function AdminPage() {
           </TableHeader>
           <TableBody>
             {products.map((product) => {
-               const image = getImage(product.imageId);
+              const image = getImage(product.imageId);
               return (
-              <TableRow key={product.id}>
-                <TableCell>
-                   <div className="relative h-16 w-16 overflow-hidden rounded-md">
-                      {image && <Image src={image.imageUrl} alt={product.name} fill className="object-cover" data-ai-hint={image.imageHint} />}
+                <TableRow key={product.id}>
+                  <TableCell>
+                    <div className="relative h-16 w-16 overflow-hidden rounded-md">
+                      {image && (
+                        <Image
+                          src={image.imageUrl}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                          data-ai-hint={image.imageHint}
+                        />
+                      )}
                     </div>
-                </TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>{product.category}</TableCell>
-                <TableCell>${product.price.toFixed(2)}</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      Edit
-                    </Button>
-                    <Button variant="destructive" size="sm">
-                      Delete
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )})}
+                  </TableCell>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.category}</TableCell>
+                  <TableCell>${product.price.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        Edit
+                      </Button>
+                      <Button variant="destructive" size="sm">
+                        Delete
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

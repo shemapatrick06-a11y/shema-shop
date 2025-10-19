@@ -19,8 +19,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('shemashop@shop.com');
-  const [password, setPassword] = useState('shema12@');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const auth = useAuth();
   const router = useRouter();
@@ -28,6 +28,14 @@ export default function LoginPage() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Information',
+        description: 'Please enter both email and password.',
+      });
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -39,11 +47,16 @@ export default function LoginPage() {
       router.push('/admin');
     } catch (error: any) {
       console.error('Sign in error:', error);
+      let description = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') {
+        description = 'Invalid credentials. Please check your email and password, or sign up if you do not have an account.';
+      }
       toast({
         variant: 'destructive',
         title: 'Sign In Failed',
-        description: error.message || 'An unexpected error occurred.',
+        description: description,
       });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -64,7 +77,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder="admin@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

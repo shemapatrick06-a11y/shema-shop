@@ -23,7 +23,7 @@ const InstagramIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function SiteFooter() {
   return (
     <footer className="w-full border-t bg-card">
-      <div className="container mx-auto grid grid-cols-1 gap-8 px-4 py-12 text-center md:grid-cols-3 md:text-left">
+      <div className="container mx-auto grid grid-cols-1 gap-8 px-4 py-12 text-center md:grid-cols-4 md:text-left">
         <div>
           <h3 className="font-headline text-lg font-semibold">TrendyThreads</h3>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -51,22 +51,32 @@ export default function SiteFooter() {
             FOLLOW US
           </h4>
           <div className="mt-4 flex justify-center gap-4 md:justify-start">
-            <Link href="#" aria-label="Twitter">
-              <TwitterIcon className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground" />
-            </Link>
-            <Link href="#" aria-label="Facebook">
+            <Link href="https://www.facebook.com/profile.php?id=100083285062420" aria-label="Facebook" target="_blank">
               <FacebookIcon className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground" />
             </Link>
-            <Link href="#" aria-label="Instagram">
+            <Link href="https://www.instagram.com/shema9862/" aria-label="Instagram" target="_blank">
               <InstagramIcon className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground" />
             </Link>
           </div>
+        </div>
+        <div>
+          <h4 className="font-semibold tracking-wider text-muted-foreground">
+            CONTACT
+          </h4>
+          <p className="mt-2 text-sm text-muted-foreground">
+            <a href="mailto:shemapatrick06@gmail.com" className="hover:text-foreground">
+              shemapatrick06@gmail.com
+            </a>
+          </p>
         </div>
       </div>
       <div className="border-t">
         <div className="container mx-auto flex flex-wrap items-center justify-between px-4 py-6 text-sm text-muted-foreground">
           <p>© 2025 TrendyThreads. All Rights Reserved.</p>
           <div className="flex gap-4">
+            <Link href="/admin" className="hover:text-foreground">
+              Admin
+            </Link>
             <Link href="#" className="hover:text-foreground">
               Privacy Policy
             </Link>

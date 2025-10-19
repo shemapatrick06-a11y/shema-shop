@@ -16,26 +16,6 @@ export default function SiteHeader() {
               Shema Shop
             </span>
           </Link>
-          <nav className="hidden gap-6 md:flex">
-            <Link
-              href="/collections/men"
-              className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Men
-            </Link>
-            <Link
-              href="/collections/women"
-              className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Women
-            </Link>
-            <Link
-              href="/collections/sale"
-              className="flex items-center text-sm font-medium text-primary transition-colors hover:text-primary/80"
-            >
-              Sale
-            </Link>
-          </nav>
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-4">

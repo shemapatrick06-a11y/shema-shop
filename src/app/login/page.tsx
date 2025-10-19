@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, initiateEmailSignIn } from '@/firebase';
+import { useAuth } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -29,7 +30,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      initiateEmailSignIn(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       // The auth state change will be handled by the onAuthStateChanged listener
       // in the FirebaseProvider, which will then redirect.
       // For now, we can optimistically navigate or wait for a user object.

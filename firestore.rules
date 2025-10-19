@@ -1,0 +1,168 @@
+/**
+ * @fileoverview Firestore Security Rules for TrendyThreads Online Store
+ *
+ * Core Philosophy:
+ * This ruleset enforces a role-based access control model where admins (determined by document existence in /roles_admin/{userId}) can manage products, and users can only access their own data (customers, orders, reviews).
+ *
+ * Data Structure:
+ * - /products/{productId}: Stores product information, managed by admins.
+ * - /customers/{customerId}: Stores customer information, accessible only by the customer themselves.
+ * - /customers/{customerId}/orders/{orderId}: Stores order information, accessible only by the customer who placed the order.
+ * - /customers/{customerId}/orders/{orderId}/orderItems/{orderItemId}: Stores individual order items, accessible only by the customer who owns the order.
+ * - /products/{productId}/reviews/{reviewId}: Stores product reviews, accessible by everyone for reading but creates/updates only by the author.
+ * - /roles_admin/{userId}: Determines admin role by document existence.
+ *
+ * Key Security Decisions:
+ * - Listing of products is implicitly public.
+ * - Customers can only access their own data (orders, profile).
+ * - Admin privileges are determined by the existence of a document in the `/roles_admin/{userId}` collection.
+ *
+ * Denormalization for Authorization:
+ *  - Admin role is determined by document existence in `/roles_admin/{userId}`, avoiding data reads in other rules.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Checks if the user is signed in.
+     * @return {boolean} True if the user is signed in, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the user ID matches the requested ID.
+     * @param {string} userId The user ID to check against.
+     * @return {boolean} True if the user ID matches, false otherwise.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the user is an existing owner (signed in, owns the resource, and the resource exists).
+     * @param {string} userId The user ID to check against.
+     * @return {boolean} True if the user is an existing owner, false otherwise.
+     */
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Checks if the user is an admin by verifying the existence of a document in /roles_admin/{userId}.
+     * @return {boolean} True if the user is an admin, false otherwise.
+     */
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * @description Rules for the /products/{productId} collection.
+     * @path /products/{productId}
+     * @allow (create) User with admin role can create a new product.
+     * @allow (update) User with admin role can update a product.
+     * @allow (delete) User with admin role can delete a product.
+     * @deny (create) User without admin role cannot create a product.
+     * @deny (update) User without admin role cannot update a product.
+     * @deny (delete) User without admin role cannot delete a product.
+     * @principle Enforces admin-only access for product management.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for the /customers/{customerId} collection.
+     * @path /customers/{customerId}
+     * @allow (create) User can create their own customer document.
+     * @allow (get) User can get their own customer document.
+     * @allow (update) User can update their own customer document.
+     * @deny (create) User cannot create a customer document for another user.
+     * @deny (get) User cannot get another user's customer document.
+     * @deny (update) User cannot update another user's customer document.
+     * @principle Enforces user-ownership for customer data.
+     */
+    match /customers/{customerId} {
+      allow get, list: if isOwner(customerId);
+      allow create: if isOwner(customerId) && request.resource.data.id == customerId;
+      allow update: if isExistingOwner(customerId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(customerId);
+    }
+
+    /**
+     * @description Rules for the /customers/{customerId}/orders/{orderId} collection.
+     * @path /customers/{customerId}/orders/{orderId}
+     * @allow (get) User can get their own order.
+     * @allow (create) User can create an order under their customer id.
+     * @allow (update) User can update their own order.
+     * @deny (get) User cannot get another user's order.
+     * @deny (create) User cannot create an order under another user.
+     * @deny (update) User cannot update another user's order.
+     * @principle Enforces user-ownership for order data.
+     */
+    match /customers/{customerId}/orders/{orderId} {
+      allow get, list: if isOwner(customerId);
+      allow create: if isOwner(customerId) && request.resource.data.customerId == customerId;
+      allow update: if isExistingOwner(customerId) && request.resource.data.customerId == resource.data.customerId;
+      allow delete: if isExistingOwner(customerId);
+    }
+
+    /**
+     * @description Rules for the /customers/{customerId}/orders/{orderId}/orderItems/{orderItemId} collection.
+     * @path /customers/{customerId}/orders/{orderId}/orderItems/{orderItemId}
+     * @allow (get) User can get an orderItem within their own order.
+     * @allow (create) User can create an orderItem within their own order.
+     * @allow (update) User can update an orderItem within their own order.
+     * @deny (get) User cannot get an orderItem within another user's order.
+     * @deny (create) User cannot create an orderItem within another user's order.
+     * @deny (update) User cannot update an orderItem within another user's order.
+     * @principle Enforces user-ownership for order item data.
+     */
+    match /customers/{customerId}/orders/{orderId}/orderItems/{orderItemId} {
+      allow get, list: if isOwner(customerId);
+      allow create: if isOwner(customerId);
+      allow update: if isExistingOwner(customerId);
+      allow delete: if isExistingOwner(customerId);
+    }
+
+    /**
+     * @description Rules for the /products/{productId}/reviews/{reviewId} collection.
+     * @path /products/{productId}/reviews/{reviewId}
+     * @allow (get, list) Any user can read reviews for a product.
+     * @allow (create) User can create a review for a product.
+     * @allow (update) User can update their own review.
+     * @deny (create) User cannot create a review for another user.
+     * @deny (update) User cannot update another user's review.
+     * @principle Allows public read access for product reviews, but enforces ownership for writes.
+     */
+    match /products/{productId}/reviews/{reviewId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.customerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.customerId == request.auth.uid && resource != null;
+      allow delete: if isSignedIn() && resource.data.customerId == request.auth.uid && resource != null;
+    }
+
+     /**
+      * @description Rules for the /roles_admin/{userId} collection.
+      * @path /roles_admin/{userId}
+      * @allow (create) Only allow server-side functions.
+      * @allow (get)  Used by `isAdmin()` function, so allow all reads.
+      * @allow (list) Only allow server-side functions.
+      * @allow (update) Only allow server-side functions.
+      * @allow (delete) Only allow server-side functions.
+      * @principle  Admin role determination through document existence.  Clients can't create these documents.
+      */
+     match /roles_admin/{userId} {
+        allow get: if true;
+        allow list: if false;
+        allow create: if false;
+        allow update: if false;
+        allow delete: if false;
+     }
+  }
+}

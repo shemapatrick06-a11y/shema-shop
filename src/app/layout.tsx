@@ -7,7 +7,7 @@ import { FirebaseClientProvider } from '@/firebase';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TrendyThreads',
+  title: 'Shema Shop',
   description: 'The future of online fashion.',
 };
 

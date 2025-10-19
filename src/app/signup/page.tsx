@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -18,30 +18,30 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('shemashop@shop.com');
-  const [password, setPassword] = useState('shema12@');
+export default function SignUpPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(auth, email, password);
       toast({
-        title: 'Signing in...',
-        description: 'You will be redirected to the admin panel shortly.',
+        title: 'Account Created!',
+        description: "You're now being redirected to the admin panel.",
       });
       router.push('/admin');
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error('Sign up error:', error);
       toast({
         variant: 'destructive',
-        title: 'Sign In Failed',
+        title: 'Sign Up Failed',
         description: error.message || 'An unexpected error occurred.',
       });
       setIsLoading(false);
@@ -52,19 +52,19 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <CardTitle className="text-2xl">Create an Admin Account</CardTitle>
           <CardDescription>
-            Enter your credentials to access the dashboard.
+            Enter your email and password to create an account.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSignIn}>
+        <form onSubmit={handleSignUp}>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder="admin@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -85,12 +85,12 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex-col gap-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
             <div className="text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="underline">
-                Sign up
+              Already have an account?{' '}
+              <Link href="/login" className="underline">
+                Log in
               </Link>
             </div>
           </CardFooter>

@@ -10,12 +10,32 @@ export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center space-x-4 px-4 sm:justify-between sm:space-x-0">
-        <div className="flex gap-6 md:gap-10">
+        <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-headline inline-block text-2xl font-bold">
               Shema Shop
             </span>
           </Link>
+          <nav className="hidden gap-6 md:flex">
+            <Link
+              href="/#men"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Men
+            </Link>
+            <Link
+              href="/#women"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Women
+            </Link>
+            <Link
+              href="/#kids"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Kids
+            </Link>
+          </nav>
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">

@@ -1,0 +1,62 @@
+'use client';
+
+import Link from 'next/link';
+import { Search, ShoppingCart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import CartDrawer from './cart-drawer';
+
+export default function SiteHeader() {
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-[#2c3e50] text-primary-foreground shadow-sm">
+      <div className="container mx-auto flex h-16 items-center space-x-4 px-4 sm:justify-between sm:space-x-0">
+        <div className="flex gap-6 md:gap-10">
+          <Link href="/" className="flex items-center space-x-2">
+            <span className="font-headline inline-block text-2xl font-bold">
+              TrendyThreads
+            </span>
+          </Link>
+          <nav className="hidden gap-6 md:flex">
+            <Link
+              href="/collections/men"
+              className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Men
+            </Link>
+            <Link
+              href="/collections/women"
+              className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Women
+            </Link>
+            <Link
+              href="/collections/sale"
+              className="flex items-center text-sm font-medium text-primary transition-colors hover:text-primary/80"
+            >
+              Sale
+            </Link>
+          </nav>
+        </div>
+
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          <div className="hidden w-full max-w-sm items-center space-x-2 lg:flex">
+            <Input
+              type="search"
+              placeholder="Find jeans..."
+              className="border-primary-foreground/20 bg-transparent text-primary-foreground placeholder:text-muted-foreground focus:bg-[#2c3e50]"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              variant="ghost"
+              className="hover:bg-primary-foreground/10"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+          </div>
+          <CartDrawer />
+        </div>
+      </div>
+    </header>
+  );
+}

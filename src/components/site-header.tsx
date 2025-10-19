@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CartDrawer from './cart-drawer';
@@ -18,7 +18,7 @@ export default function SiteHeader() {
           </Link>
         </div>
 
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2">
           <div className="hidden w-full max-w-sm items-center space-x-2 lg:flex">
             <Input
               type="search"
@@ -34,6 +34,16 @@ export default function SiteHeader() {
               <Search className="h-5 w-5" />
             </Button>
           </div>
+          <Link href="/login">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative hover:bg-primary-foreground/10"
+              aria-label="Admin Login"
+            >
+              <User className="h-6 w-6" />
+            </Button>
+          </Link>
           <CartDrawer />
         </div>
       </div>

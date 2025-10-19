@@ -11,7 +11,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { getChatbotResponse } from '@/ai/flows/chatbot-flow';
@@ -27,7 +27,7 @@ export default function Chatbot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   const role = user ? 'admin' : 'customer';
 
@@ -40,12 +40,12 @@ export default function Chatbot() {
         },
       ]);
     }
-  }, [isOpen, role]);
+  }, [isOpen]);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
+    if (viewportRef.current) {
+      viewportRef.current.scrollTo({
+        top: viewportRef.current.scrollHeight,
         behavior: 'smooth',
       });
     }
@@ -103,7 +103,7 @@ export default function Chatbot() {
             </Button>
           </CardHeader>
           <CardContent className="p-0">
-            <ScrollArea className="h-80" ref={scrollAreaRef}>
+            <ScrollArea className="h-80" viewportRef={viewportRef}>
               <div className="space-y-4 p-4">
                 {messages.map((message, index) => (
                   <div

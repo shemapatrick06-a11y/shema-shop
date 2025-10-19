@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import HeroCarousel from '@/components/hero-carousel';
 import ProductCard from '@/components/product-card';
 import { products } from '@/data/products';
@@ -9,8 +12,32 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const { toast } = useToast();
+
+  const handleApplyFilters = () => {
+    toast({
+      title: 'Filters Applied',
+      description: 'Your product list has been updated.',
+    });
+  };
+
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    // Simulate loading more products
+    setTimeout(() => {
+      // In a real app, you would fetch more products here
+      setIsLoadingMore(false);
+      toast({
+        title: 'More products loaded!',
+      });
+    }, 2000);
+  };
+
   return (
     <>
       <HeroCarousel />
@@ -59,7 +86,7 @@ export default function Home() {
                 <SelectItem value="xl">XL</SelectItem>
               </SelectContent>
             </Select>
-            <Button>Apply Filters</Button>
+            <Button onClick={handleApplyFilters}>Apply Filters</Button>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -69,8 +96,20 @@ export default function Home() {
           </div>
 
           <div className="mt-12 text-center">
-            <Button variant="outline" size="lg">
-              Loading more styles...
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+            >
+              {isLoadingMore ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Load More Styles'
+              )}
             </Button>
           </div>
         </div>

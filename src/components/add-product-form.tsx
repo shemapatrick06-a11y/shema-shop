@@ -59,10 +59,8 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
     setIsLoading(true);
     try {
       // 1. Generate image from description
+      toast({ title: 'Generating product image...', description: 'This may take a moment.' });
       const imageResponse = await generateProductImage({ description: data.description });
-      if (!imageResponse.imageUrl) {
-        throw new Error('Image generation failed.');
-      }
       
       // 2. Prepare product data
       const productData = {
@@ -84,12 +82,12 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
       });
       setOpen(false);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding product:', error);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'Could not add the product. Please try again.',
+        description: error.message || 'Could not add the product. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -132,7 +130,7 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="A soft, breathable shirt..." {...field} />
+                <Textarea placeholder="A photorealistic image of a single clothing item on a clean, white background. The item is: a soft, breathable shirt" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

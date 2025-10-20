@@ -33,13 +33,13 @@ const generateProductImageFlow = ai.defineFlow(
   async input => {
     const {media} = await ai.generate({
       model: 'googleai/imagen-4.0-fast-generate-001',
-      prompt: `Generate an image of a ${input.description}`,
+      prompt: `Generate a photorealistic image of a single clothing item on a clean, white background. The item is: ${input.description}`,
     });
 
-    if (!media) {
-      throw new Error('No image was generated.');
+    if (!media || !media.url) {
+      throw new Error('Image generation failed: The AI model did not return an image.');
     }
 
-    return {imageUrl: media.url!};
+    return {imageUrl: media.url};
   }
 );

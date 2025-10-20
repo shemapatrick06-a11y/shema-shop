@@ -20,7 +20,6 @@ import {
 import { useFirestore } from '@/firebase';
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { collection } from 'firebase/firestore';
-import { generateProductImage } from '@/ai/flows/image-generation';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
@@ -31,6 +30,7 @@ const formSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   category: z.string().min(1, 'Category is required'),
   sizes: z.string().min(1, 'Please enter comma-separated sizes'),
+  imageUrl: z.string().url('Please enter a valid image URL'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -52,27 +52,24 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
       description: '',
       category: '',
       sizes: '',
+      imageUrl: '',
     },
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
     try {
-      // 1. Generate image from description
-      toast({ title: 'Generating product image...', description: 'This may take a moment.' });
-      const imageResponse = await generateProductImage({ description: data.description });
-      
-      // 2. Prepare product data
+      // 1. Prepare product data
       const productData = {
         name: data.name,
         price: data.price,
         description: data.description,
         category: data.category,
         sizes: data.sizes.split(',').map(s => s.trim()),
-        imageUrl: imageResponse.imageUrl, // Use AI-generated image URL
+        imageUrl: data.imageUrl,
       };
 
-      // 3. Save to Firestore
+      // 2. Save to Firestore
       const productsCollection = collection(firestore, 'products');
       await addDocumentNonBlocking(productsCollection, productData);
 
@@ -110,6 +107,19 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
             </FormItem>
           )}
         />
+         <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image URL</FormLabel>
+              <FormControl>
+                <Input placeholder="https://example.com/image.png" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="price"
@@ -130,7 +140,7 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="A photorealistic image of a single clothing item on a clean, white background. The item is: a soft, breathable shirt" {...field} />
+                <Textarea placeholder="A soft, breathable shirt perfect for any occasion." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

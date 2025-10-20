@@ -8,12 +8,12 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import type { CartItem } from '@/lib/types';
+import type { CartItem, Product } from '@/lib/types';
 import { useToast } from './use-toast';
 
 interface CartContextType {
   cart: CartItem[];
-  addItem: (item: Omit<CartItem, 'quantity'>) => void;
+  addItem: (item: Omit<CartItem, 'quantity'> & {quantity?: number}) => void;
   removeItem: (id: string, size: string) => void;
   updateQuantity: (id: string, size: string, quantity: number) => void;
   clearCart: () => void;
@@ -48,7 +48,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [cart]);
 
   const addItem = useCallback(
-    (item: Omit<CartItem, 'quantity'>) => {
+    (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
       setCart((prevCart) => {
         const existingItem = prevCart.find(
           (cartItem) => cartItem.id === item.id && cartItem.size === item.size
@@ -56,18 +56,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (existingItem) {
           return prevCart.map((cartItem) =>
             cartItem.id === item.id && cartItem.size === item.size
-              ? { ...cartItem, quantity: cartItem.quantity + 1 }
+              ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
               : cartItem
           );
         }
-        return [...prevCart, { ...item, quantity: 1 }];
-      });
-      toast({
-        title: 'Item Added to Cart 🎉',
-        description: `${item.name} has been added to your cart.`,
+        return [...prevCart, { ...item, quantity: item.quantity || 1 }];
       });
     },
-    [toast]
+    []
   );
 
   const removeItem = useCallback((id: string, size: string) => {

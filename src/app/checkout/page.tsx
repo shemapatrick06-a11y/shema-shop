@@ -6,14 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
-  const { cart, cartCount, totalPrice, removeItem } = useCart();
-
-  const getImage = (id: string) =>
-    PlaceHolderImages.find((img) => img.id === id);
+  const { cart, cartCount, totalPrice } = useCart();
 
   if (cartCount === 0) {
     return (
@@ -90,11 +86,10 @@ export default function CheckoutPage() {
            <h2 className="text-xl font-semibold">Order Summary</h2>
             <div className="mt-6 space-y-4">
               {cart.map(item => {
-                 const image = getImage(item.imageId);
                  return (
                   <div key={`${item.id}-${item.size}`} className="flex items-center gap-4">
                     <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md">
-                      {image && <Image src={image.imageUrl} alt={item.name} fill className="object-cover" data-ai-hint={image.imageHint} />}
+                      {item.imageUrl && <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />}
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">{item.name}</p>

@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -18,6 +17,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { useFirestore } from '@/firebase';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { collection } from 'firebase/firestore';
+import { generateProductImage } from '@/ai/flows/image-generation';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
@@ -28,7 +31,6 @@ const formSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   category: z.string().min(1, 'Category is required'),
   sizes: z.string().min(1, 'Please enter comma-separated sizes'),
-  image: z.any().refine((files) => files?.length === 1, 'Image is required.'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -40,6 +42,7 @@ interface AddProductFormProps {
 export default function AddProductForm({ setOpen }: AddProductFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const firestore = useFirestore();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -49,24 +52,48 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
       description: '',
       category: '',
       sizes: '',
-      image: undefined,
     },
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
-    // In the next step, we will replace this with a call to Firebase
-    console.log('Form data submitted:', data);
+    try {
+      // 1. Generate image from description
+      const imageResponse = await generateProductImage({ description: data.description });
+      if (!imageResponse.imageUrl) {
+        throw new Error('Image generation failed.');
+      }
+      
+      // 2. Prepare product data
+      const productData = {
+        name: data.name,
+        price: data.price,
+        description: data.description,
+        category: data.category,
+        sizes: data.sizes.split(',').map(s => s.trim()),
+        imageUrl: imageResponse.imageUrl, // Use AI-generated image URL
+      };
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsLoading(false);
-    toast({
-      title: 'Product Added (Simulated)!',
-      description: `${data.name} has been added to the product list.`,
-    });
-    setOpen(false);
+      // 3. Save to Firestore
+      const productsCollection = collection(firestore, 'products');
+      await addDocumentNonBlocking(productsCollection, productData);
+
+      toast({
+        title: 'Product Added!',
+        description: `${data.name} has been successfully added.`,
+      });
+      setOpen(false);
+
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Could not add the product. Please try again.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -137,24 +164,7 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="image"
-          render={({ field: { onChange, value, ...rest } }) => (
-            <FormItem>
-              <FormLabel>Product Image</FormLabel>
-              <FormControl>
-                <Input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={(e) => onChange(e.target.files)} 
-                  {...rest}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? <Loader2 className="animate-spin" /> : 'Add Product'}
         </Button>

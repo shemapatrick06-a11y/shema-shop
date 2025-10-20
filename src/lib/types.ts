@@ -3,7 +3,7 @@ export type Product = {
   name: string;
   price: number;
   description: string;
-  imageId: string;
+  imageUrl: string; // Changed from imageId
   category: string;
   sizes: string[];
 };
@@ -12,7 +12,7 @@ export type CartItem = {
   id: string;
   name: string;
   price: number;
-  imageId: string;
+  imageUrl: string; // Changed from imageId
   quantity: number;
   size: string;
 };

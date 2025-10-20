@@ -16,14 +16,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { ScrollArea } from './ui/scroll-area';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Input } from './ui/input';
 
 export default function CartDrawer() {
   const { cart, cartCount, totalPrice, updateQuantity, removeItem } =
     useCart();
-  const getImage = (id: string) =>
-    PlaceHolderImages.find((img) => img.id === id);
 
   return (
     <Sheet>
@@ -49,70 +46,66 @@ export default function CartDrawer() {
           <>
             <ScrollArea className="flex-1">
               <div className="space-y-4 px-6">
-                {cart.map((item) => {
-                  const image = getImage(item.imageId);
-                  return (
-                    <div key={`${item.id}-${item.size}`} className="flex gap-4">
-                      <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
-                        {image && (
-                           <Image
-                            src={image.imageUrl}
-                            alt={item.name}
-                            fill
-                            className="object-cover"
-                            data-ai-hint={image.imageHint}
-                          />
-                        )}
-                      </div>
-                      <div className="flex flex-1 flex-col">
-                        <div className="flex justify-between">
-                          <div>
-                            <h4 className="font-semibold">{item.name}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Size: {item.size}
-                            </p>
-                          </div>
-                          <p className="font-semibold">
-                            ${item.price.toFixed(2)}
+                {cart.map((item) => (
+                  <div key={`${item.id}-${item.size}`} className="flex gap-4">
+                    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
+                      {item.imageUrl && (
+                         <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-1 flex-col">
+                      <div className="flex justify-between">
+                        <div>
+                          <h4 className="font-semibold">{item.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Size: {item.size}
                           </p>
                         </div>
-                        <div className="mt-auto flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() =>
-                                updateQuantity(item.id, item.size, item.quantity - 1)
-                              }
-                            >
-                              -
-                            </Button>
-                            <span>{item.quantity}</span>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() =>
-                                updateQuantity(item.id, item.size, item.quantity + 1)
-                              }
-                            >
-                              +
-                            </Button>
-                          </div>
+                        <p className="font-semibold">
+                          ${item.price.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="mt-auto flex items-center justify-between">
+                        <div className="flex items-center gap-2">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="icon"
-                            className="text-muted-foreground hover:text-destructive"
-                            onClick={() => removeItem(item.id, item.size)}
+                            className="h-8 w-8"
+                            onClick={() =>
+                              updateQuantity(item.id, item.size, item.quantity - 1)
+                            }
                           >
-                            <X className="h-4 w-4" />
+                            -
+                          </Button>
+                          <span>{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() =>
+                              updateQuantity(item.id, item.size, item.quantity + 1)
+                            }
+                          >
+                            +
                           </Button>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-destructive"
+                          onClick={() => removeItem(item.id, item.size)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </ScrollArea>
             <SheetFooter className="mt-auto bg-background px-6 py-4">
@@ -146,7 +139,9 @@ export default function CartDrawer() {
               Looks like you haven't added anything yet.
             </p>
             <SheetClose asChild>
-              <Button>Start Shopping</Button>
+              <Button asChild>
+                <Link href="/">Start Shopping</Link>
+              </Button>
             </SheetClose>
           </div>
         )}

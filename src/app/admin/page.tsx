@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -12,9 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { products } from '@/data/products';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import {
   Dialog,
   DialogContent,
@@ -23,11 +21,21 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import AddProductForm from '@/components/add-product-form';
+import { collection, deleteDoc, doc } from 'firebase/firestore';
+import type { Product } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function AdminPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  
+  const productsQuery = useMemoFirebase(() => collection(firestore, 'products'), [firestore]);
+  const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -35,16 +43,26 @@ export default function AdminPage() {
     }
   }, [user, isUserLoading, router]);
 
+  const handleDelete = (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    const productDocRef = doc(firestore, 'products', productId);
+    deleteDocumentNonBlocking(productDocRef);
+
+    toast({
+      title: 'Product Deleted',
+      description: 'The product has been successfully removed.',
+    });
+  };
+
   if (isUserLoading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <p className="ml-2">Loading...</p>
       </div>
     );
   }
-
-  const getImage = (id: string) =>
-    PlaceHolderImages.find((img) => img.id === id);
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-16">
@@ -77,19 +95,26 @@ export default function AdminPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => {
-              const image = getImage(product.imageId);
-              return (
+            {isLoadingProducts ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  <div className="flex justify-center items-center p-8">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span className="ml-2">Loading products...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : products && products.length > 0 ? (
+              products.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
                     <div className="relative h-16 w-16 overflow-hidden rounded-md">
-                      {image && (
+                      {product.imageUrl && (
                         <Image
-                          src={image.imageUrl}
+                          src={product.imageUrl}
                           alt={product.name}
                           fill
                           className="object-cover"
-                          data-ai-hint={image.imageHint}
                         />
                       )}
                     </div>
@@ -102,14 +127,24 @@ export default function AdminPage() {
                       <Button variant="outline" size="sm">
                         Edit
                       </Button>
-                      <Button variant="destructive" size="sm">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(product.id)}
+                      >
                         Delete
                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
-              );
-            })}
+              ))
+            ) : (
+               <TableRow>
+                <TableCell colSpan={5} className="text-center h-24">
+                  No products found. Add one to get started.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>

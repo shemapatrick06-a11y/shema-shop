@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import HeroCarousel from '@/components/hero-carousel';
 import ProductCard from '@/components/product-card';
-import { products } from '@/data/products';
 import {
   Select,
   SelectContent,
@@ -14,10 +13,18 @@ import {
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import type { Product } from '@/lib/types';
+import { collection } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const productsQuery = useMemoFirebase(() => collection(firestore, 'products'), [firestore]);
+  const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
 
   const handleApplyFilters = () => {
     toast({
@@ -28,9 +35,7 @@ export default function Home() {
 
   const handleLoadMore = () => {
     setIsLoadingMore(true);
-    // Simulate loading more products
     setTimeout(() => {
-      // In a real app, you would fetch more products here
       setIsLoadingMore(false);
       toast({
         title: 'More products loaded!',
@@ -90,9 +95,18 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {isLoadingProducts
+              ? Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="flex flex-col gap-4">
+                    <Skeleton className="h-80 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-6 w-1/4" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ))
+              : products?.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
           </div>
 
           <div className="mt-12 text-center">

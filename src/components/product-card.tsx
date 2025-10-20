@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useCart } from '@/hooks/use-cart';
 import {
   Select,
@@ -32,8 +31,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
   const [selectedSize, setSelectedSize] = useState<string>('');
 
-  const image = PlaceHolderImages.find((img) => img.id === product.imageId);
-
   const handleAddToCart = () => {
     if (!selectedSize) {
       toast({
@@ -43,6 +40,10 @@ export default function ProductCard({ product }: ProductCardProps) {
       return;
     }
     addItem({ ...product, size: selectedSize });
+    toast({
+      title: 'Added to cart!',
+      description: `${product.name} has been added to your cart.`
+    })
   };
 
   return (
@@ -50,13 +51,12 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product.id}`} className="block flex-shrink-0">
         <CardHeader className="p-0">
           <div className="relative h-80 w-full">
-            {image ? (
+            {product.imageUrl ? (
               <Image
-                src={image.imageUrl}
+                src={product.imageUrl}
                 alt={product.name}
                 fill
                 className="object-cover"
-                data-ai-hint={image.imageHint}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-muted">

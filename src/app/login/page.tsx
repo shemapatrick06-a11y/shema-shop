@@ -10,7 +10,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -41,15 +40,19 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({
-        title: 'Signing in...',
-        description: 'You will be redirected to the admin panel shortly.',
+        title: 'Signed In!',
+        description: "You're now logged in.",
       });
-      router.push('/admin');
+      router.push('/'); // Redirect to homepage after customer login
     } catch (error: any) {
       console.error('Sign in error:', error);
       let description = 'An unexpected error occurred. Please try again.';
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') {
-        description = 'Invalid credentials. Please check your email and password, or sign up if you do not have an account.';
+      if (
+        error.code === 'auth/invalid-credential' ||
+        error.code === 'auth/user-not-found'
+      ) {
+        description =
+          'Invalid credentials. Please check your email and password, or sign up if you do not have an account.';
       }
       toast({
         variant: 'destructive',
@@ -65,9 +68,9 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Enter your credentials to access the dashboard.
+            Enter your email below to login to your account.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSignIn}>
@@ -77,7 +80,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="m@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -100,7 +103,7 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
-            <div className="text-center text-sm">
+            <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{' '}
               <Link href="/signup" className="underline">
                 Sign up

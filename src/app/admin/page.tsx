@@ -50,7 +50,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collectionGroup, query, orderBy, limit } from 'firebase/firestore';
+import { collectionGroup, query, orderBy, limit, Firestore } from 'firebase/firestore';
 import type { Order } from '@/lib/types';
 import { useMemo, useState, useEffect } from 'react';
 
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
                   {!isClient || isLoadingRecentOrders ? (
                     <TableRow>
                       <TableCell colSpan={2} className="text-center h-24">
-                        {isClient ? 'Loading recent transactions...' : 'No transactions yet.'}
+                        {isClient ? 'Loading recent transactions...' : ''}
                       </TableCell>
                     </TableRow>
                   ) : recentOrders && recentOrders.length > 0 ? (

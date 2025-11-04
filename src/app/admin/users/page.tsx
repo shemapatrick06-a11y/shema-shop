@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, Firestore } from 'firebase/firestore';
 import type { Customer } from '@/lib/types';
 import {
   Card,

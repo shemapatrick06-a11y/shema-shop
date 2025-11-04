@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -5,7 +6,7 @@ import { useParams } from 'next/navigation';
 import ProductCard from '@/components/product-card';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/types';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, Firestore } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,7 @@ export default function CategoryPage() {
 
   const productsQuery = useMemoFirebase(
     () =>
-      category
+      (firestore && category)
         ? query(collection(firestore, 'products'), where('category', '==', category))
         : null,
     [firestore, category]

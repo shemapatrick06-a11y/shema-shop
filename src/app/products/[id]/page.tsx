@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -17,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import ProductCard from '@/components/product-card';
 import { useDoc, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/types';
-import { doc, collection, query, where, limit } from 'firebase/firestore';
+import { doc, collection, query, where, limit, Firestore } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductPage({ params }: { params: { id: string } }) {
@@ -26,11 +27,11 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
   const firestore = useFirestore();
 
-  const productRef = useMemoFirebase(() => doc(firestore, 'products', params.id), [firestore, params.id]);
+  const productRef = useMemoFirebase(() => firestore ? doc(firestore, 'products', params.id) : null, [firestore, params.id]);
   const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
 
   const relatedProductsQuery = useMemoFirebase(() => 
-    product ? query(
+    (firestore && product) ? query(
       collection(firestore, 'products'),
       where('category', '==', product.category),
       where('__name__', '!=', product.id),

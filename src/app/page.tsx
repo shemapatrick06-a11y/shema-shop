@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -15,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/types';
-import { collection } from 'firebase/firestore';
+import { collection, Firestore } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -23,7 +24,7 @@ export default function Home() {
   const { toast } = useToast();
   const firestore = useFirestore();
 
-  const productsQuery = useMemoFirebase(() => collection(firestore, 'products'), [firestore]);
+  const productsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'products') : null, [firestore]);
   const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
 
   const handleApplyFilters = () => {

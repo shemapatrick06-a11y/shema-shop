@@ -1,6 +1,6 @@
+
 'use client';
 
-import Link from 'next/link';
 import {
   Activity,
   ArrowUpRight,
@@ -52,7 +52,7 @@ import {
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collectionGroup, query, orderBy, limit } from 'firebase/firestore';
 import type { Order } from '@/lib/types';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 const chartConfig = {
   desktop: {
@@ -67,6 +67,11 @@ const chartConfig = {
 
 export default function AdminDashboard() {
   const firestore = useFirestore();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const ordersQuery = useMemoFirebase(
     () => firestore ? query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc')) : null,
@@ -81,9 +86,9 @@ export default function AdminDashboard() {
   const { data: orders, isLoading: isLoadingOrders } = useCollection<Order>(ordersQuery);
   const { data: recentOrders, isLoading: isLoadingRecentOrders } = useCollection<Order>(recentOrdersQuery);
 
-  const { totalRevenue, totalSales, salesData, productPerformance } = useMemo(() => {
+  const { totalRevenue, totalSales, salesData } = useMemo(() => {
     if (!orders) {
-      return { totalRevenue: 0, totalSales: 0, salesData: [], productPerformance: [] };
+      return { totalRevenue: 0, totalSales: 0, salesData: [] };
     }
 
     const totalRevenue = orders.reduce((acc, order) => acc + order.totalAmount, 0);
@@ -101,7 +106,7 @@ export default function AdminDashboard() {
     })).reverse();
 
 
-    return { totalRevenue, totalSales, salesData, productPerformance: [] };
+    return { totalRevenue, totalSales, salesData };
   }, [orders]);
 
 
@@ -213,9 +218,11 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isLoadingRecentOrders ? (
+                  {!isClient || isLoadingRecentOrders ? (
                     <TableRow>
-                      <TableCell colSpan={2} className="text-center h-24">Loading recent transactions...</TableCell>
+                      <TableCell colSpan={2} className="text-center h-24">
+                        {isClient ? 'Loading recent transactions...' : 'No transactions yet.'}
+                      </TableCell>
                     </TableRow>
                   ) : recentOrders && recentOrders.length > 0 ? (
                     recentOrders.map(order => (

@@ -16,6 +16,7 @@ import Image from 'next/image';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -80,6 +81,9 @@ export default function AdminPage() {
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Add New Product</DialogTitle>
+              <DialogDescription>
+                Fill in the details below to add a new product to your store.
+              </DialogDescription>
             </DialogHeader>
             <AddProductForm setOpen={setOpen} />
           </DialogContent>

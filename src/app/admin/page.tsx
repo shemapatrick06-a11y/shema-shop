@@ -69,12 +69,12 @@ export default function AdminDashboard() {
   const firestore = useFirestore();
 
   const ordersQuery = useMemoFirebase(
-    () => query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc')),
+    () => firestore ? query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc')) : null,
     [firestore]
   );
   
   const recentOrdersQuery = useMemoFirebase(
-    () => query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc'), limit(5)),
+    () => firestore ? query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc'), limit(5)) : null,
     [firestore]
   );
 

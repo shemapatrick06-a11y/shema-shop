@@ -48,7 +48,7 @@ export default function AdminProductsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  const productsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'products'): null, [firestore]);
+  const productsQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'products'): null), [firestore]);
   const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
 
   useEffect(() => {

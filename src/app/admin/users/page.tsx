@@ -26,7 +26,7 @@ export default function UsersPage() {
   const firestore = useFirestore();
 
   const customersQuery = useMemoFirebase(
-    () => firestore ? collection(firestore, 'customers') : null,
+    () => (firestore ? collection(firestore, 'customers') : null),
     [firestore]
   );
   

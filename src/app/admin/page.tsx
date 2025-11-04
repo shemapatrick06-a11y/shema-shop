@@ -218,10 +218,10 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {!isClient || isLoadingRecentOrders ? (
+                  {isLoadingRecentOrders ? (
                     <TableRow>
                       <TableCell colSpan={2} className="text-center h-24">
-                        {isClient ? 'Loading recent transactions...' : ''}
+                        Loading recent transactions...
                       </TableCell>
                     </TableRow>
                   ) : recentOrders && recentOrders.length > 0 ? (

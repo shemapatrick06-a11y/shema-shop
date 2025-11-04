@@ -27,7 +27,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
   const firestore = useFirestore();
 
-  const productRef = useMemoFirebase(() => firestore ? doc(firestore, 'products', params.id) : null, [firestore, params.id]);
+  const productRef = useMemoFirebase(() => (firestore ? doc(firestore, 'products', params.id) : null), [firestore, params.id]);
   const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
 
   const relatedProductsQuery = useMemoFirebase(() => 

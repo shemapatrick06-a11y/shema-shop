@@ -24,7 +24,7 @@ export default function Home() {
   const { toast } = useToast();
   const firestore = useFirestore();
 
-  const productsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'products') : null, [firestore]);
+  const productsQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'products') : null), [firestore]);
   const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
 
   const handleApplyFilters = () => {

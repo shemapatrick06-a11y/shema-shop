@@ -18,19 +18,19 @@ export default function SiteHeader() {
           </Link>
           <nav className="hidden gap-6 md:flex">
             <Link
-              href="/#men"
+              href="/products/category/Men"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Men
             </Link>
             <Link
-              href="/#women"
+              href="/products/category/Women"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Women
             </Link>
             <Link
-              href="/#kids"
+              href="/products/category/Kids"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Kids

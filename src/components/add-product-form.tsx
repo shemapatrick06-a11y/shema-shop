@@ -17,6 +17,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useFirestore } from '@/firebase';
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { collection } from 'firebase/firestore';
@@ -59,17 +66,12 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
     try {
-      // 1. Prepare product data
       const productData = {
-        name: data.name,
-        price: data.price,
-        description: data.description,
-        category: data.category,
+        ...data,
         sizes: data.sizes.split(',').map(s => s.trim()),
-        imageUrl: data.imageUrl,
+        price: Number(data.price),
       };
 
-      // 2. Save to Firestore
       const productsCollection = collection(firestore, 'products');
       await addDocumentNonBlocking(productsCollection, productData);
 
@@ -152,9 +154,18 @@ export default function AddProductForm({ setOpen }: AddProductFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Shirts" {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Men">Men</SelectItem>
+                  <SelectItem value="Women">Women</SelectItem>
+                  <SelectItem value="Kids">Kids</SelectItem>
+                </SelectContent>
+              </Select>>
               <FormMessage />
             </FormItem>
           )}

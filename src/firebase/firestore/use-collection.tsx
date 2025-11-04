@@ -58,20 +58,18 @@ export function useCollection<T = any>(
   type StateDataType = ResultItemType[] | null;
 
   const [data, setData] = useState<StateDataType>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Start as loading until we know for sure
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
-  // Use the passed-in query directly, assuming it's memoized by the caller.
   const memoizedTargetRefOrQuery = targetRefOrQuery;
 
   useEffect(() => {
-    // **Defensive Check:** If the query is not ready, do nothing and reset state.
-    // This is the critical fix to prevent root queries.
+    // Definitive check: If the query is not ready, do nothing and set a non-loading state.
     if (!memoizedTargetRefOrQuery) {
       setData(null);
       setIsLoading(false); // Not loading because we aren't fetching.
       setError(null);
-      return; // Stop execution here.
+      return; // Stop execution immediately.
     }
 
     setIsLoading(true);
@@ -89,6 +87,7 @@ export function useCollection<T = any>(
         setIsLoading(false);
       },
       (error: FirestoreError) => {
+        // This check is redundant due to the guard at the top, but safe to keep.
         if (!memoizedTargetRefOrQuery) return;
         const path: string =
           memoizedTargetRefOrQuery.type === 'collection'

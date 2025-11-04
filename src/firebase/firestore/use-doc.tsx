@@ -44,19 +44,18 @@ export function useDoc<T = any>(
   type StateDataType = WithId<T> | null;
 
   const [data, setData] = useState<StateDataType>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
-  const memoizedDocRef = docRef; // Assume docRef is memoized by the caller
+  const memoizedDocRef = docRef;
 
   useEffect(() => {
-    // **Defensive Check:** If the docRef is not ready, do nothing and reset state.
-    // This is the critical fix.
+    // Definitive check: If the docRef is not ready, do nothing and set a non-loading state.
     if (!memoizedDocRef) {
       setData(null);
       setIsLoading(false); // Not loading because we aren't fetching.
       setError(null);
-      return; // Stop execution here.
+      return; // Stop execution immediately.
     }
 
     setIsLoading(true);
@@ -90,7 +89,7 @@ export function useDoc<T = any>(
     );
 
     return () => unsubscribe();
-  }, [memoizedDocRef]); // Re-run if the memoizedDocRef changes.
+  }, [memoizedDocRef]);
 
   return { data, isLoading, error };
 }

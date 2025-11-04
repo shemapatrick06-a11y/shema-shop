@@ -45,7 +45,7 @@ export default function AnalyticsPage() {
   const firestore = useFirestore();
 
   const ordersQuery = useMemoFirebase(
-    () => firestore ? query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc')) : null,
+    () => (firestore ? query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc')) : null),
     [firestore]
   );
   

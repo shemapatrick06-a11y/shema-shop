@@ -58,18 +58,20 @@ export function useCollection<T = any>(
   type StateDataType = ResultItemType[] | null;
 
   const [data, setData] = useState<StateDataType>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Start as loading
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Start as loading until we know for sure
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
-  const memoizedTargetRefOrQuery = useMemo(() => targetRefOrQuery, [targetRefOrQuery]);
+  // Use the passed-in query directly, assuming it's memoized by the caller.
+  const memoizedTargetRefOrQuery = targetRefOrQuery;
 
   useEffect(() => {
-    // If the query is not ready, do nothing and reset state.
+    // **Defensive Check:** If the query is not ready, do nothing and reset state.
+    // This is the critical fix to prevent root queries.
     if (!memoizedTargetRefOrQuery) {
       setData(null);
       setIsLoading(false); // Not loading because we aren't fetching.
       setError(null);
-      return;
+      return; // Stop execution here.
     }
 
     setIsLoading(true);

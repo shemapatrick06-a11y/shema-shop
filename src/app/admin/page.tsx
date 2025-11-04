@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -28,16 +27,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import {
   Table,
   TableBody,
   TableCell,
@@ -46,16 +35,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
   Line,
   LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
+  CartesianGrid,
 } from 'recharts';
 
 import {
@@ -63,15 +49,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collectionGroup, query, orderBy, limit } from 'firebase/firestore';
+import type { Order } from '@/lib/types';
+import { useMemo } from 'react';
 
-const chartData = [
-  { month: 'January', desktop: 186, mobile: 80 },
-  { month: 'February', desktop: 305, mobile: 200 },
-  { month: 'March', desktop: 237, mobile: 120 },
-  { month: 'April', desktop: 73, mobile: 190 },
-  { month: 'May', desktop: 209, mobile: 130 },
-  { month: 'June', desktop: 214, mobile: 140 },
-];
 const chartConfig = {
   desktop: {
     label: 'Desktop',
@@ -84,6 +66,45 @@ const chartConfig = {
 };
 
 export default function AdminDashboard() {
+  const firestore = useFirestore();
+
+  const ordersQuery = useMemoFirebase(
+    () => query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc')),
+    [firestore]
+  );
+  
+  const recentOrdersQuery = useMemoFirebase(
+    () => query(collectionGroup(firestore, 'orders'), orderBy('orderDate', 'desc'), limit(5)),
+    [firestore]
+  );
+
+  const { data: orders, isLoading: isLoadingOrders } = useCollection<Order>(ordersQuery);
+  const { data: recentOrders, isLoading: isLoadingRecentOrders } = useCollection<Order>(recentOrdersQuery);
+
+  const { totalRevenue, totalSales, salesData, productPerformance } = useMemo(() => {
+    if (!orders) {
+      return { totalRevenue: 0, totalSales: 0, salesData: [], productPerformance: [] };
+    }
+
+    const totalRevenue = orders.reduce((acc, order) => acc + order.totalAmount, 0);
+    const totalSales = orders.length;
+
+    const salesByMonth: { [key: string]: number } = {};
+    orders.forEach(order => {
+      const month = new Date(order.orderDate).toLocaleString('default', { month: 'long' });
+      salesByMonth[month] = (salesByMonth[month] || 0) + order.totalAmount;
+    });
+    
+    const salesData = Object.entries(salesByMonth).map(([month, revenue]) => ({
+      month,
+      revenue
+    })).reverse();
+
+
+    return { totalRevenue, totalSales, salesData, productPerformance: [] };
+  }, [orders]);
+
+
   return (
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
@@ -96,28 +117,28 @@ export default function AdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$148,380</div>
+              <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Sales</CardDescription>
-              <CardTitle className="text-4xl">48,396</CardTitle>
+              <CardTitle className="text-4xl">{totalSales}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-xs text-muted-foreground">
-                +25% from last week
+                Total sales across all time.
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Earnings</CardDescription>
-              <CardTitle className="text-4xl">$174,882</CardTitle>
+              <CardTitle className="text-4xl">${totalRevenue.toFixed(2)}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-xs text-muted-foreground">
-                +18% from last month
+                Total earnings from all sales.
               </div>
             </CardContent>
           </Card>
@@ -126,12 +147,12 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle>Sales Overview</CardTitle>
             <CardDescription>
-              A chart showing the sales overview for the last 6 months.
+              A chart showing the sales overview for the last months.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-              <LineChart data={chartData}>
+              <LineChart data={salesData}>
                 <CartesianGrid vertical={false} />
                 <XAxis dataKey="month" tickLine={false} axisLine={false} />
                 <YAxis tickLine={false} axisLine={false} />
@@ -140,16 +161,9 @@ export default function AdminDashboard() {
                   content={<ChartTooltipContent indicator="line" />}
                 />
                 <Line
-                  dataKey="desktop"
+                  dataKey="revenue"
                   type="monotone"
                   stroke="var(--color-desktop)"
-                  strokeWidth={2}
-                  dot={true}
-                />
-                <Line
-                  dataKey="mobile"
-                  type="monotone"
-                  stroke="var(--color-mobile)"
                   strokeWidth={2}
                   dot={true}
                 />
@@ -162,7 +176,7 @@ export default function AdminDashboard() {
             <CardHeader>
               <CardTitle>Product Performance</CardTitle>
               <CardDescription>
-                Top performing products by sales.
+                Top performing products by sales. (Feature coming soon)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -175,22 +189,9 @@ export default function AdminDashboard() {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Furniture</div>
+                    <TableCell colSpan={2} className="text-center h-24">
+                      Product performance data is not yet available.
                     </TableCell>
-                    <TableCell className="text-right">12,890</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Footwear</div>
-                    </TableCell>
-                    <TableCell className="text-right">7,842</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Jewellery</div>
-                    </TableCell>
-                    <TableCell className="text-right">989</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -200,46 +201,37 @@ export default function AdminDashboard() {
             <CardHeader>
               <CardTitle>Recent Transactions</CardTitle>
               <CardDescription>
-                A list of recent transactions.
+                A list of recent transactions from your store.
               </CardDescription>
             </CardHeader>
             <CardContent>
             <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Transaction</TableHead>
+                    <TableHead>Customer</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Wise Transfer</div>
-                      <div className="text-sm text-muted-foreground">21 Jun 2022 at 12:01 am</div>
-                    </TableCell>
-                    <TableCell className="text-right">-$21.97</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Google Wallet Payment</div>
-                       <div className="text-sm text-muted-foreground">20 Jun 2022 at 11:58 pm</div>
-                    </TableCell>
-                    <TableCell className="text-right">-$97.50</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Apple Pay Payment</div>
-                       <div className="text-sm text-muted-foreground">20 Jun 2022 at 11:32 pm</div>
-                    </TableCell>
-                    <TableCell className="text-right text-green-500">+$659.99</TableCell>
-                  </TableRow>
-                   <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Paypal Transfer</div>
-                       <div className="text-sm text-muted-foreground">20 Jun 2022 at 11:17 pm</div>
-                    </TableCell>
-                    <TableCell className="text-right">-$59.00</TableCell>
-                  </TableRow>
+                  {isLoadingRecentOrders ? (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-center h-24">Loading recent transactions...</TableCell>
+                    </TableRow>
+                  ) : recentOrders && recentOrders.length > 0 ? (
+                    recentOrders.map(order => (
+                       <TableRow key={order.id}>
+                        <TableCell>
+                          <div className="font-medium">{order.customerId.substring(0, 12)}...</div>
+                          <div className="text-sm text-muted-foreground">{new Date(order.orderDate).toLocaleDateString()}</div>
+                        </TableCell>
+                        <TableCell className="text-right">${order.totalAmount.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-center h-24">No transactions yet.</TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>

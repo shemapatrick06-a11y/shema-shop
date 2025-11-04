@@ -3,7 +3,7 @@ export type Product = {
   name: string;
   price: number;
   description: string;
-  imageUrl: string; // Changed from imageId
+  imageUrl: string;
   category: string;
   sizes: string[];
 };
@@ -12,7 +12,24 @@ export type CartItem = {
   id: string;
   name: string;
   price: number;
-  imageUrl: string; // Changed from imageId
+  imageUrl: string;
   quantity: number;
   size: string;
+};
+
+export type Order = {
+    id: string;
+    customerId: string;
+    orderDate: string; // ISO string format
+    totalAmount: number;
+    shippingAddress: string;
+    orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered';
+};
+
+export type OrderItem = {
+    id: string;
+    orderId: string;
+    productId: string;
+    quantity: number;
+    unitPrice: number;
 };

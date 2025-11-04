@@ -132,7 +132,8 @@ export default function AdminProductsPage() {
                         <Image
                           src={product.imageUrl}
                           alt={product.name}
-                          fill
+                          width={64}
+                          height={64}
                           className="object-cover"
                         />
                       )}

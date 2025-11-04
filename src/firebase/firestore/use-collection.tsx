@@ -52,13 +52,13 @@ export interface InternalQuery extends Query<DocumentData> {
  * @returns {UseCollectionResult<T>} Object with data, isLoading, error.
  */
 export function useCollection<T = any>(
-    targetRefOrQuery: ((CollectionReference<DocumentData> | Query<DocumentData>))  | null | undefined,
+    targetRefOrQuery: ((CollectionReference<DocumentData> | Query<DocumentData>))  | null | undefined = null,
 ): UseCollectionResult<T> {
   type ResultItemType = WithId<T>;
   type StateDataType = ResultItemType[] | null;
 
   const [data, setData] = useState<StateDataType>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   const memoizedTargetRefOrQuery = targetRefOrQuery;
@@ -70,6 +70,23 @@ export function useCollection<T = any>(
       setIsLoading(false); // Not loading because we aren't fetching.
       setError(null);
       return; // Stop execution immediately.
+    }
+
+    // Safety check: Prevent root collection queries
+    const path: string =
+      memoizedTargetRefOrQuery.type === 'collection'
+        ? (memoizedTargetRefOrQuery as CollectionReference).path
+        : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString();
+
+    if (!path || path === '' || path === '/') {
+      const rootError = new Error(
+        'Invalid Firestore query: Cannot query root collection. Please specify a collection name.'
+      );
+      setError(rootError);
+      setData(null);
+      setIsLoading(false);
+      console.error(rootError.message);
+      return;
     }
 
     setIsLoading(true);
@@ -87,11 +104,6 @@ export function useCollection<T = any>(
         setIsLoading(false);
       },
       (error: FirestoreError) => {
-        const path: string =
-          memoizedTargetRefOrQuery.type === 'collection'
-            ? (memoizedTargetRefOrQuery as CollectionReference).path
-            : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString()
-
         const contextualError = new FirestorePermissionError({
           operation: 'list',
           path,

@@ -1,9 +1,42 @@
+
 'use client';
 
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import {
+  Activity,
+  ArrowUpRight,
+  CircleUser,
+  CreditCard,
+  DollarSign,
+  Menu,
+  Package2,
+  Search,
+  Users,
+} from 'lucide-react';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   Table,
   TableBody,
@@ -12,149 +45,206 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import Image from 'next/image';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import AddProductForm from '@/components/add-product-form';
-import { collection, deleteDoc, doc } from 'firebase/firestore';
-import type { Product } from '@/lib/types';
-import { Loader2, PlusCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
-export default function AdminPage() {
-  const { user, isUserLoading } = useUser();
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const firestore = useFirestore();
-  const { toast } = useToast();
-  
-  const productsQuery = useMemoFirebase(() => collection(firestore, 'products'), [firestore]);
-  const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
 
-  useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/login');
-    }
-  }, [user, isUserLoading, router]);
+const chartData = [
+  { month: 'January', desktop: 186, mobile: 80 },
+  { month: 'February', desktop: 305, mobile: 200 },
+  { month: 'March', desktop: 237, mobile: 120 },
+  { month: 'April', desktop: 73, mobile: 190 },
+  { month: 'May', desktop: 209, mobile: 130 },
+  { month: 'June', desktop: 214, mobile: 140 },
+];
+const chartConfig = {
+  desktop: {
+    label: 'Desktop',
+    color: 'hsl(var(--chart-1))',
+  },
+  mobile: {
+    label: 'Mobile',
+    color: 'hsl(var(--chart-2))',
+  },
+};
 
-  const handleDelete = (productId: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
-    
-    const productDocRef = doc(firestore, 'products', productId);
-    deleteDocumentNonBlocking(productDocRef);
-
-    toast({
-      title: 'Product Deleted',
-      description: 'The product has been successfully removed.',
-    });
-  };
-
-  if (isUserLoading || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <p className="ml-2">Loading...</p>
-      </div>
-    );
-  }
-
+export default function AdminDashboard() {
   return (
-    <div className="container mx-auto px-4 py-12 md:py-16">
-      <div className="flex items-center justify-between">
-        <h1 className="font-headline text-3xl font-bold md:text-4xl">
-          Manage Products
-        </h1>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button size="lg">
-              <PlusCircle className="mr-2" />
-              Add New Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
-              <DialogDescription>
-                Fill in the details below to add a new product to your store.
-              </DialogDescription>
-            </DialogHeader>
-            <AddProductForm setOpen={setOpen} />
-          </DialogContent>
-        </Dialog>
+      <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+          <Card className="sm:col-span-2">
+            <CardHeader className="pb-3">
+              <CardTitle>Revenue</CardTitle>
+              <CardDescription className="max-w-lg text-balance leading-relaxed">
+                Introducing Our Dynamic Orders Dashboard for Seamless
+                Management and Insightful Analysis.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$148,380</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Sales</CardDescription>
+              <CardTitle className="text-4xl">48,396</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xs text-muted-foreground">
+                +25% from last week
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Earnings</CardDescription>
+              <CardTitle className="text-4xl">$174,882</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xs text-muted-foreground">
+                +18% from last month
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Sales Overview</CardTitle>
+            <CardDescription>
+              A chart showing the sales overview for the last 6 months.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+              <LineChart data={chartData}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} />
+                <Tooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="line" />}
+                />
+                <Line
+                  dataKey="desktop"
+                  type="monotone"
+                  stroke="var(--color-desktop)"
+                  strokeWidth={2}
+                  dot={true}
+                />
+                <Line
+                  dataKey="mobile"
+                  type="monotone"
+                  stroke="var(--color-mobile)"
+                  strokeWidth={2}
+                  dot={true}
+                />
+              </LineChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Performance</CardTitle>
+              <CardDescription>
+                Top performing products by sales.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead className="text-right">Sales</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
+                      <div className="font-medium">Furniture</div>
+                    </TableCell>
+                    <TableCell className="text-right">12,890</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <div className="font-medium">Footwear</div>
+                    </TableCell>
+                    <TableCell className="text-right">7,842</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <div className="font-medium">Jewellery</div>
+                    </TableCell>
+                    <TableCell className="text-right">989</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>
+                A list of recent transactions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+            <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Transaction</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
+                      <div className="font-medium">Wise Transfer</div>
+                      <div className="text-sm text-muted-foreground">21 Jun 2022 at 12:01 am</div>
+                    </TableCell>
+                    <TableCell className="text-right">-$21.97</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <div className="font-medium">Google Wallet Payment</div>
+                       <div className="text-sm text-muted-foreground">20 Jun 2022 at 11:58 pm</div>
+                    </TableCell>
+                    <TableCell className="text-right">-$97.50</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <div className="font-medium">Apple Pay Payment</div>
+                       <div className="text-sm text-muted-foreground">20 Jun 2022 at 11:32 pm</div>
+                    </TableCell>
+                    <TableCell className="text-right text-green-500">+$659.99</TableCell>
+                  </TableRow>
+                   <TableRow>
+                    <TableCell>
+                      <div className="font-medium">Paypal Transfer</div>
+                       <div className="text-sm text-muted-foreground">20 Jun 2022 at 11:17 pm</div>
+                    </TableCell>
+                    <TableCell className="text-right">-$59.00</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      <div className="mt-8 overflow-hidden rounded-lg border shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[80px]">Image</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoadingProducts ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center">
-                  <div className="flex justify-center items-center p-8">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    <span className="ml-2">Loading products...</span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : products && products.length > 0 ? (
-              products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="relative h-16 w-16 overflow-hidden rounded-md">
-                      {product.imageUrl && (
-                        <Image
-                          src={product.imageUrl}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>${product.price.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(product.id)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-               <TableRow>
-                <TableCell colSpan={5} className="text-center h-24">
-                  No products found. Add one to get started.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
   );
 }

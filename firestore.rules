@@ -71,7 +71,7 @@ service cloud.firestore {
      */
     match /products/{productId} {
       allow get, list: if true;
-      allow create: if isSignedIn();
+      allow create: if isAdmin();
       allow update: if isAdmin() && resource != null;
       allow delete: if isAdmin() && resource != null;
     }
@@ -150,17 +150,14 @@ service cloud.firestore {
      /**
       * @description Rules for the /roles_admin/{userId} collection.
       * @path /roles_admin/{userId}
-      * @allow (create) Only allow server-side functions.
+      * @allow (create) A user can create their own admin role document.
       * @allow (get)  Used by `isAdmin()` function, so allow all reads.
-      * @allow (list) Only allow server-side functions.
-      * @allow (update) Only allow server-side functions.
-      * @allow (delete) Only allow server-side functions.
-      * @principle  Admin role determination through document existence.  Clients can't create these documents.
+      * @principle  Admin role determination through document existence.
       */
      match /roles_admin/{userId} {
         allow get: if true;
         allow list: if false;
-        allow create: if false;
+        allow create: if isOwner(userId);
         allow update: if false;
         allow delete: if false;
      }

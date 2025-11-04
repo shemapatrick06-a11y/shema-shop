@@ -59,7 +59,7 @@ export default function SiteHeader() {
               variant="ghost"
               size="icon"
               className="relative hover:bg-primary-foreground/10"
-              aria-label="Admin Login"
+              aria-label="Customer Login"
             >
               <User className="h-6 w-6" />
             </Button>

@@ -68,7 +68,7 @@ export default function SiteFooter() {
         <div className="container mx-auto flex flex-wrap items-center justify-between px-4 py-6 text-sm text-muted-foreground">
           <p>© 2025 Shema Shop. All Rights Reserved.</p>
           <div className="flex gap-4">
-            <Link href="/admin" className="hover:text-foreground">
+            <Link href="/auth/admin" className="hover:text-foreground">
               Admin
             </Link>
             <Link href="#" className="hover:text-foreground">

@@ -23,7 +23,7 @@ import {
 import AddProductForm from '@/components/add-product-form';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
@@ -72,7 +72,10 @@ export default function AdminPage() {
         </h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>Add New Product</Button>
+            <Button size="lg">
+              <PlusCircle className="mr-2" />
+              Add New Product
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>

@@ -70,7 +70,7 @@ export default function AdminLayout({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="#"
+                  href="/admin/orders"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -94,7 +94,7 @@ export default function AdminLayout({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="#"
+                  href="/admin/users"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Users className="h-5 w-5" />
@@ -106,7 +106,7 @@ export default function AdminLayout({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="#"
+                  href="/admin/analytics"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <LineChart className="h-5 w-5" />
@@ -158,7 +158,7 @@ export default function AdminLayout({
                   Dashboard
                 </Link>
                 <Link
-                  href="#"
+                  href="/admin/orders"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -172,11 +172,18 @@ export default function AdminLayout({
                   Products
                 </Link>
                 <Link
-                  href="#"
+                  href="/admin/users"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <Users className="h-5 w-5" />
                   Customers
+                </Link>
+                <Link
+                  href="/admin/analytics"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  <LineChart className="h-5 w-5" />
+                   Analytics
                 </Link>
                 <Link
                   href="#"

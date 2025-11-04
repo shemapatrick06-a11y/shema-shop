@@ -33,3 +33,10 @@ export type OrderItem = {
     quantity: number;
     unitPrice: number;
 };
+
+export type Customer = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+};

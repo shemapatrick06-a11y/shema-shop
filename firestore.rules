@@ -161,5 +161,15 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if false;
      }
+
+    /**
+     * @description Collection group rule for 'orders'. Allows admins to list all orders across all customers.
+     * @path /{path=**}/orders/{orderId}
+     * @allow (list) Admin users can list all orders.
+     * @principle Enables admin-level data aggregation.
+     */
+    match /{path=**}/orders/{orderId} {
+      allow list: if isAdmin();
+    }
   }
 }
